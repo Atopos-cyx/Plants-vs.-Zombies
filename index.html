@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>植物大战僵尸小游戏</title>
+<style>
+body{font-family:Arial;text-align:center;background:#87ceeb}canvas{background:#5cb85c;border:3px solid #333}button{padding:10px;margin:8px;font-size:16px}
+</style>
+</head>
+<body>
+<h1>🌻 植物大战僵尸 Mini Game</h1>
+<p>点击草地种向日葵，自动产生阳光；点击植物发射豌豆攻击僵尸</p>
+<button onclick="start()">开始游戏</button>
+<canvas id="game" width="800" height="400"></canvas>
+<script>
+const c=document.getElementById('game'),ctx=c.getContext('2d');
+let plants=[],zombies=[],bullets=[],sun=100,running=false,score=0;
+function start(){running=true;plants=[];zombies=[];bullets=[];score=0;loop();setInterval(()=>{if(running)zombies.push({x:780,y:80+Math.random()*250,hp:3});},2000)}
+c.onclick=e=>{if(!running)return;let r=c.getBoundingClientRect();plants.push({x:e.clientX-r.left,y:e.clientY-r.top});};
+function loop(){if(!running)return;ctx.clearRect(0,0,800,400);ctx.fillStyle='yellow';ctx.fillText('阳光:'+sun+' 分数:'+score,20,25);
+plants.forEach(p=>{ctx.fillStyle='gold';ctx.beginPath();ctx.arc(p.x,p.y,20,0,7);ctx.fill();if(Math.random()<0.03)bullets.push({x:p.x+20,y:p.y});});
+zombies.forEach(z=>{z.x-=0.4;ctx.fillStyle='gray';ctx.fillRect(z.x,z.y,35,50);});
+bullets.forEach((b,i)=>{b.x+=4;ctx.fillStyle='green';ctx.fillRect(b.x,b.y,10,5);zombies.forEach((z,j)=>{if(Math.abs(b.x-z.x)<20&&Math.abs(b.y-z.y)<30){z.hp--;bullets.splice(i,1);if(z.hp<=0){zombies.splice(j,1);score++}}})});
+zombies.forEach(z=>{if(z.x<0){running=false;alert('僵尸吃掉了你的脑子！得分:'+score)}});requestAnimationFrame(loop)}
+</script>
+</body>
+</html>
