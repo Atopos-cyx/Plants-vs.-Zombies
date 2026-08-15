@@ -1,27 +1,11 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<title>植物大战僵尸小游戏</title>
-<style>
-body{font-family:Arial;text-align:center;background:#87ceeb}canvas{background:#5cb85c;border:3px solid #333}button{padding:10px;margin:8px;font-size:16px}
-</style>
-</head>
-<body>
-<h1>🌻 植物大战僵尸 Mini Game</h1>
-<p>点击草地种向日葵，自动产生阳光；点击植物发射豌豆攻击僵尸</p>
-<button onclick="start()">开始游戏</button>
-<canvas id="game" width="800" height="400"></canvas>
+<html lang="zh-CN"><head><meta charset="UTF-8"><title>植物大战僵尸 Mini</title><style>body{text-align:center;font-family:Arial;background:#87ceeb}.card{display:inline-block;background:#fff;border:2px solid #555;padding:8px;margin:5px;cursor:pointer;border-radius:8px}canvas{background:#5cb85c;border:3px solid #333}</style></head><body>
+<h1>🌻 植物大战僵尸</h1><div id="cards"></div><h3>☀️阳光:<span id="sun">150</span>　得分:<span id="score">0</span></h3><canvas id="game" width="800" height="400"></canvas>
 <script>
-const c=document.getElementById('game'),ctx=c.getContext('2d');
-let plants=[],zombies=[],bullets=[],sun=100,running=false,score=0;
-function start(){running=true;plants=[];zombies=[];bullets=[];score=0;loop();setInterval(()=>{if(running)zombies.push({x:780,y:80+Math.random()*250,hp:3});},2000)}
-c.onclick=e=>{if(!running)return;let r=c.getBoundingClientRect();plants.push({x:e.clientX-r.left,y:e.clientY-r.top});};
-function loop(){if(!running)return;ctx.clearRect(0,0,800,400);ctx.fillStyle='yellow';ctx.fillText('阳光:'+sun+' 分数:'+score,20,25);
-plants.forEach(p=>{ctx.fillStyle='gold';ctx.beginPath();ctx.arc(p.x,p.y,20,0,7);ctx.fill();if(Math.random()<0.03)bullets.push({x:p.x+20,y:p.y});});
-zombies.forEach(z=>{z.x-=0.4;ctx.fillStyle='gray';ctx.fillRect(z.x,z.y,35,50);});
-bullets.forEach((b,i)=>{b.x+=4;ctx.fillStyle='green';ctx.fillRect(b.x,b.y,10,5);zombies.forEach((z,j)=>{if(Math.abs(b.x-z.x)<20&&Math.abs(b.y-z.y)<30){z.hp--;bullets.splice(i,1);if(z.hp<=0){zombies.splice(j,1);score++}}})});
-zombies.forEach(z=>{if(z.x<0){running=false;alert('僵尸吃掉了你的脑子！得分:'+score)}});requestAnimationFrame(loop)}
-</script>
-</body>
-</html>
+let ctx=game.getContext('2d'),sun=150,score=0,plants=[],zombies=[],bullets=[],sunballs=[],selected=null;
+let types=[['🌻向日葵',50,'sun'],['🌱豌豆射手',100,'pea'],['🥜坚果墙',75,'wall']];
+types.forEach(t=>{let d=document.createElement('div');d.className='card';d.innerHTML=t[0]+'<br>'+t[1]+'☀️';d.onclick=()=>selected=t;cards.appendChild(d)});
+game.onclick=e=>{sunballs.forEach((s,i)=>{if(Math.abs(e.offsetX-s.x)<25&&Math.abs(e.offsetY-s.y)<25){sun+=25;sunballs.splice(i,1);update()}});if(selected&&sun>=selected[1]){sun-=selected[1];plants.push({x:e.offsetX,y:e.offsetY,type:selected[2],hp:10});selected=null;update()}};
+setInterval(()=>sunballs.push({x:Math.random()*750,y:50}),3000);setInterval(()=>zombies.push({x:780,y:100+Math.random()*200,hp:5}),2500);setInterval(()=>plants.forEach(p=>{if(p.type==='sun')sunballs.push({x:p.x,y:p.y})}),5000);
+function update(){document.getElementById('sun').innerHTML=sun;document.getElementById('score').innerHTML=score}
+function loop(){ctx.clearRect(0,0,800,400);ctx.font='32px Arial';plants.forEach(p=>{ctx.fillText(p.type==='pea'?'🌱':p.type==='sun'?'🌻':'🥜',p.x,p.y);if(p.type==='pea'&&Math.random()<.05)bullets.push({x:p.x,y:p.y})});sunballs.forEach(s=>ctx.fillText('☀️',s.x,s.y));zombies.forEach(z=>{z.x-=.4;ctx.fillText('🧟',z.x,z.y)});bullets.forEach((b,i)=>{b.x+=5;ctx.fillText('🟢',b.x,b.y);zombies.forEach((z,j)=>{if(Math.abs(b.x-z.x)<20){z.hp--;bullets.splice(i,1);if(z.hp<=0){zombies.splice(j,1);score++;update()}}})});requestAnimationFrame(loop)}update();loop();</script></body></html>
