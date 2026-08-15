@@ -1,1 +1,36 @@
-<!DOCTYPE html><html><head><meta charset='UTF-8'><title>植物大战僵尸</title><style>body{text-align:center;background:#87ceeb;font-family:Arial}canvas{background:#5cb85c;border:3px solid #333}.card{display:inline-block;padding:8px;background:white;margin:5px}</style></head><body><h1>🌻植物大战僵尸</h1><div id='cards'></div><h3>☀️<span id='sun'>150</span> 分数:<span id='score'>0</span></h3><canvas id='game' width='800' height='400'></canvas><script>let c=game,ctx=c.getContext('2d'),sun=150,score=0,frame=0,plants=[],zombies=[],bullets=[],suns=[];let types=[['🌻',50,'sun'],['🌱',100,'pea'],['🥜',75,'wall']],sel=null;types.forEach(t=>{let d=document.createElement('div');d.className='card';d.innerHTML=t[0]+' '+t[1];d.onclick=()=>sel=t;cards.appendChild(d)});c.onclick=e=>{if(sel&&sun>=sel[1]){sun-=sel[1];plants.push({x:e.offsetX,y:e.offsetY,row:Math.floor(e.offsetY/80),type:sel[2],hp:sel[2]=='wall'?40:10});up()}};setInterval(()=>suns.push({x:50+Math.random()*700,y:20,t:100}),4000);setInterval(()=>zombies.push({x:780,row:Math.floor(Math.random()*5),hp:5}),2500);function up(){document.getElementById('sun').innerHTML=sun;scoreEl.innerHTML=score}function loop(){frame++;ctx.clearRect(0,0,800,400);plants.forEach(p=>{let bob=p.type=='sun'?Math.sin(frame/10)*5:0;ctx.font='42px Arial';ctx.fillText(p.type=='pea'?'🌱😮':' '+(p.type=='sun'?'🌻':'🥜'),p.x-20,p.y+bob);if(p.type=='pea'&&frame%50==0)bullets.push({x:p.x+20,y:p.y-20,row:p.row});ctx.fillStyle='lime';ctx.fillRect(p.x-20,p.y+10,40*p.hp/(p.type=='wall'?40:10),5)});suns.forEach((s,i)=>{ctx.font='30px Arial';ctx.fillText('☀️',s.x,s.y);s.y+=.2;if(s.y>380)suns.splice(i,1)});zombies.forEach(z=>{ctx.font='40px Arial';ctx.fillText('🧟',z.x,z.row*80+55);z.x-=.36});bullets.forEach((b,i)=>{b.x+=1.25;ctx.fillText('🟢',b.x,b.y);zombies.forEach((z,j)=>{if(z.row==b.row&&Math.abs(b.x-z.x)<20){z.hp--;if(z.hp<=0){zombies.splice(j,1);score++}bullets.splice(i,1)}})});requestAnimationFrame(loop)}c.addEventListener('click',e=>suns.forEach((s,i)=>{if(Math.hypot(e.offsetX-s.x,e.offsetY-s.y)<45){sun+=25;suns.splice(i,1);up()}}));setInterval(()=>{sun+=25;up()},5000);up();loop();</script></body></html>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>植物大战僵尸</title>
+<style>
+body{background:#87ceeb;text-align:center;font-family:Arial}.card{display:inline-block;background:white;border:2px solid #555;padding:10px;margin:5px;cursor:pointer;border-radius:10px}canvas{background:#5cb85c;border:3px solid #333}
+</style>
+</head>
+<body>
+<h1>🌻 植物大战僵尸</h1>
+<div id="cards"></div>
+<h3>☀️阳光:<span id="sun">150</span> 分数:<span id="score">0</span></h3>
+<canvas id="game" width="800" height="400"></canvas>
+<script>
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const sunText=document.getElementById('sun'),scoreText=document.getElementById('score');
+let sun=150,score=0,plants=[],zombies=[],bullets=[],drops=[],selected=null,frame=0;
+const cards=[['🌻向日葵',50,'sun',10],['🌱豌豆射手',100,'pea',10],['🥜坚果墙',75,'wall',40]];
+cards.forEach(c=>{let d=document.createElement('div');d.className='card';d.innerHTML=c[0]+'<br>'+c[1]+'☀️';d.onclick=()=>selected=c;document.getElementById('cards').appendChild(d)});
+canvas.onclick=e=>{let x=e.offsetX,y=e.offsetY;if(selected&&sun>=selected[1]){sun-=selected[1];plants.push({x:x,y:y,row:Math.floor(y/80),type:selected[2],hp:selected[3],max:selected[3]});update()}};
+function update(){sunText.textContent=sun;scoreText.textContent=score}
+setInterval(()=>drops.push({x:50+Math.random()*700,y:30}),4000);
+setInterval(()=>zombies.push({x:780,row:Math.floor(Math.random()*5),hp:5}),2500);
+function loop(){frame++;ctx.clearRect(0,0,800,400);
+for(let i=0;i<5;i++){ctx.strokeRect(0,i*80,800,80)}
+plants.forEach(p=>{let y=p.y+(p.type==='sun'?Math.sin(frame/10)*5:0);ctx.font='40px Arial';ctx.fillText(p.type==='pea'?(frame%40<15?'🌱😮':'🌱'):p.type==='sun'?'🌻':'🥜',p.x-20,y);ctx.fillStyle='lime';ctx.fillRect(p.x-20,y+10,40*p.hp/p.max,5);if(p.type==='pea'&&frame%50===0)bullets.push({x:p.x+20,y:y-10,row:p.row})});
+drops.forEach((d,i)=>{ctx.font='30px Arial';ctx.fillText('☀️',d.x,d.y);d.y+=0.3;if(d.y>380)drops.splice(i,1)});
+zombies.forEach(z=>{ctx.font='40px Arial';ctx.fillText('🧟',z.x,z.row*80+55);z.x-=0.36});
+bullets.forEach((b,i)=>{b.x+=1.25;ctx.fillText('🟢',b.x,b.y);zombies.forEach((z,j)=>{if(z.row===b.row&&Math.abs(b.x-z.x)<25){z.hp--;bullets.splice(i,1);if(z.hp<=0){zombies.splice(j,1);score++;update()}}})});requestAnimationFrame(loop)}
+canvas.addEventListener('click',e=>{drops.forEach((d,i)=>{if(Math.hypot(e.offsetX-d.x,e.offsetY-d.y)<45){sun+=25;drops.splice(i,1);update()}})});
+setInterval(()=>{sun+=25;update()},5000);
+update();loop();
+</script>
+</body>
+</html>
